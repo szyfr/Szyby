@@ -1,13 +1,12 @@
 package main
 
 
-import (
-	_"runtime"
-	_"github.com/veandco/go-sdl2/sdl"
-)
+//= Imports
 
 
-func main() {
+
+//= Main
+main :: proc() {
 	init_prg()
 
 	for program.running {
@@ -20,6 +19,4 @@ func main() {
 	close_prg()
 }
 
-func update() {
-
-}
+update :: proc() {}

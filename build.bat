@@ -1,5 +1,7 @@
 @echo off
 
+call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" x64
+
 cls
 
 for /f "tokens=2 delims==" %%a in ('wmic OS Get localdatetime /value') do set "dt=%%a"
@@ -14,7 +16,8 @@ for /F "tokens=1-4 delims=:.," %%a in ("%time%") do (
    set /A "start=(((%%a*60)+1%%b %% 100)*60+1%%c %% 100)*100+1%%d %% 100"
 )
 
-go build -o target/debug/%date%/main.exe G:\Szyby\src\
+rem go build -o target/debug/%date%/main.exe G:\Szyby\src\
+odin build G:\Szyby\src -out=G:\Szyby\target\debug\%date%\Szyby.exe
 
 rem Get end time:
 for /F "tokens=1-4 delims=:.," %%a in ("%time%") do (

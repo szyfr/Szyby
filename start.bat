@@ -7,6 +7,6 @@ set "date=%dt:~0,4%_%dt:~4,2%_%dt:~6,2%"
 
 call ./build.bat
 
-Start remedybg target/debug/%date%/main.exe
+Start remedybg target/debug/%date%/Szyby.exe
 
 code ./

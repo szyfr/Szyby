@@ -15,12 +15,14 @@ init_cpu :: proc() {
 	program.regF  = 0x00
 	program.regXY = 0x0000
 	program.regLP = 0x0000
-	program.regPC = 0xF100
+	program.regPC = 0x0000
 	program.regSP = 0xFEFF //! May not actually be stack?
 }
 
 run_cpu :: proc() {
 	opcode : u8 = program.memory[program.regPC]
+
+	fmt.printf("%X:%X - \n", program.regPC, opcode)
 
 	switch opcode {
 		//?  NOP

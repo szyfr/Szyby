@@ -3,6 +3,8 @@ package main
 
 //= Imports
 import "core:fmt"
+import "core:os"
+import "core:time"
 import "vendor:sdl2"
 
 
@@ -52,7 +54,7 @@ init_prg :: proc() {
 
 	//* Get surface
 	program.surface = sdl2.GetWindowSurface(program.window)
-	if program.surface == nil do fmt.printf("[ERROR]: Failed to get Surface")
+	if program.surface == nil do fmt.printf("[ERROR]: Failed to get Surface.")
 
 	//* Set program variables
 	program.screen  = sdl2.Rect{0, 0, 896, 704}
@@ -60,6 +62,13 @@ init_prg :: proc() {
 
 	//* CPU
 	init_cpu()
+
+	//* Boot ROM
+	bootROM, succ := os.read_entire_file_from_filename("data/boot.bin")
+	if !succ do fmt.printf("[ERROR]: Failed to load boot ROM.")
+
+	for i:=0; i<0x2000; i+=1 do program.memory[i] = bootROM[i]
+	delete(bootROM)
 }
 
 //* Closure

@@ -22,7 +22,7 @@ Color :: struct {
 
 //* Drawing full screen
 draw :: proc() {
-	t0 := time.now()
+//	t0 := time.now()
 	sdl2.FillRect(program.surface,             nil, sdl2.MapRGB(program.surface.format,200,200,200))
 	sdl2.FillRect(program.surface, &program.screen, sdl2.MapRGB(program.surface.format,255,255,255))
 
@@ -32,8 +32,8 @@ draw :: proc() {
 
 	sdl2.UpdateWindowSurface(program.window)
 
-	t1 := time.duration_milliseconds(time.since(t0))
-	fmt.printf("%v ms\n", t1)
+//	t1 := time.duration_milliseconds(time.since(t0))
+//	fmt.printf("%v ms\n", t1)
 }
 
 

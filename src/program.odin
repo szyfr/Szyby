@@ -14,7 +14,19 @@ Program :: struct {
 
 	running :  bool,
 
-	memory  :  [0xFFFF]u8,
+	//* CPU
+	halt  : bool,
+	//- Registers
+	regA  :  u8,
+	regF  :  u8,
+
+	regXY : u16,
+	regLP : u16,
+
+	regPC : u16,
+	regSP : u16,
+
+	memory  :  [0x10000]u8,
 }
 program : ^Program
 
@@ -25,10 +37,10 @@ program : ^Program
 init_prg :: proc() {
 	program = new(Program)
 
-	// Init SDL2
+	//* Init SDL2
 	if sdl2.Init(sdl2.INIT_EVERYTHING) != 0 do fmt.printf("[ERROR]: Failed to init SDL2.")
 
-	// Create Window
+	//* Create Window
 	program.window = sdl2.CreateWindow(
 		"TEST",
 		sdl2.WINDOWPOS_UNDEFINED,
@@ -38,13 +50,16 @@ init_prg :: proc() {
 	)
 	if program.window == nil do fmt.printf("[ERROR]: Failed to create window.")
 
-	// Get surface
+	//* Get surface
 	program.surface = sdl2.GetWindowSurface(program.window)
 	if program.surface == nil do fmt.printf("[ERROR]: Failed to get Surface")
 
-	// Set program variables
+	//* Set program variables
 	program.screen  = sdl2.Rect{0, 0, 896, 704}
 	program.running = true
+
+	//* CPU
+	init_cpu()
 }
 
 //* Closure

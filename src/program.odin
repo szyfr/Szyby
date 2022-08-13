@@ -3,6 +3,7 @@ package main
 
 //= Imports
 import "core:fmt"
+import "core:math/rand"
 import "core:os"
 import "core:time"
 import "vendor:sdl2"
@@ -77,6 +78,11 @@ init_prg :: proc() {
 
 	for i:=0; i<0x2000; i+=1 do program.memory[i] = bootROM[i]
 	delete(bootROM)
+
+	//* Randomize RAM
+	for i:=0xA000;i<0xFEFF;i+=1 {
+		if  i != 0xA000 || i != 0xC000 do program.memory[i] = u8(rand.uint32())
+	}
 }
 
 //* Closure

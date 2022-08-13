@@ -28,9 +28,16 @@ run_cpu :: proc() -> u8 {
 	fmt.printf("%X:%X", program.regPC, opcode)
 
 	switch opcode {
-		//?  NOP
+		//? NOP
 		case 0x00:
 			fmt.printf("\t\t- NOP")
+			cycle = 10
+			break
+
+		//? HALT
+		case 0x01:
+			fmt.printf("\t\t- HALT")
+			program.halt = true
 			cycle = 1
 			break
 
@@ -74,13 +81,22 @@ run_cpu :: proc() -> u8 {
 			program.regY = var
 			cycle = 3
 			break
+		case 0x23: // LD lp,i16
+			inc_pc()
+			var : u16 = u16(program.memory[program.regPC])
+			inc_pc()
+			var |= u16(program.memory[program.regPC]) << 8
+			fmt.printf(" %X\t- LD LP,$%X",var,var)
+			program.regLP = var
+			cycle = 4
+			break
 
 		case 0x30: // LD a,m8
 			inc_pc()
 			var : u16 = u16(program.memory[program.regPC])
 			inc_pc()
 			var += (u16(program.memory[program.regPC]) << 8)
-			fmt.printf(" %X\t- LD A,[$%X]",var,var)
+			fmt.printf(" %X\t- LD A,[$%X] (%X)",var,var,program.memory[var])
 			program.regA = program.memory[var]
 			cycle = 4
 			break
@@ -89,7 +105,7 @@ run_cpu :: proc() -> u8 {
 			var : u16 = u16(program.memory[program.regPC])
 			inc_pc()
 			var += (u16(program.memory[program.regPC]) << 8)
-			fmt.printf(" %X\t- LD X,[$%X]",var,var)
+			fmt.printf(" %X\t- LD X,[$%X] (%X)",var,var,program.memory[var])
 			program.regX = program.memory[var]
 			cycle = 4
 			break
@@ -98,7 +114,7 @@ run_cpu :: proc() -> u8 {
 			var : u16 = u16(program.memory[program.regPC])
 			inc_pc()
 			var += (u16(program.memory[program.regPC]) << 8)
-			fmt.printf(" %X\t- LD Y,[$%X]",var,var)
+			fmt.printf(" %X\t- LD Y,[$%X] (%X)",var,var,program.memory[var])
 			program.regY = program.memory[var]
 			cycle = 4
 			break
@@ -139,11 +155,47 @@ run_cpu :: proc() -> u8 {
 			break
 
 		case 0x60: // LD [LP],a
-			break
+			fmt.printf("\t\t- LD [LP],A ([%X],%X)",program.regLP,program.regA)
+			program.memory[program.regLP] = program.regA
+			cycle = 2
 		case 0x61: // LD [LP],x
 			break
 		case 0x62: // LD [LP],y
 			break
+		
+		//? INC
+		case 0x13: // INC a
+			fmt.printf("\t\t- INC A")
+			program.regA += 1
+			cycle = 2
+		case 0x14: // INC x
+			fmt.printf("\t\t- INC X")
+			program.regX += 1
+			cycle = 2
+		case 0x15: // INC y
+			fmt.printf("\t\t- INC Y")
+			program.regY += 1
+			cycle = 2
+		case 0x16: // INC lp
+			fmt.printf("\t\t- INC LP")
+			program.regLP += 1
+			cycle = 2
+		
+		//? JMP
+		case 0x24: // JMP i16 (forward)
+		case 0x25: // JMP i16 (backward)
+		case 0x26: // JMP  z,i16 (forward)
+		case 0x27: // JMP  z,i16 (backward)
+		case 0x28: // JMP nz,i16 (forward)
+		case 0x29: // JMP nz,i16 (backward)
+		case 0x2A: // JMP  c,i16 (forward)
+		case 0x2B: // JMP  c,i16 (backward)
+		case 0x2C: // JMP nc,i16 (forward)
+		case 0x2D: // JMP nc,i16 (backward)
+			inc_pc()
+			var := u8(program.memory[program.regPC])
+			fmt.printf("\t\t- JMP NC,-$%X",var)
+			program.regPC -= u16(var)
 	}
 
 	fmt.printf("\n")

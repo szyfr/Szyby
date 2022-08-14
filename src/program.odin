@@ -16,12 +16,16 @@ Program :: struct {
 	screen  :  sdl2.Rect,
 
 	running :  bool,
+	debug   :  bool,
 
 	//* CPU
 	halt  : bool,
+
 	//- Registers
 	regA  :  u8,
 	regF  :  u8,
+	//? 0 - Z
+	//? 1 - C
 	regX  :  u8,
 	regY  :  u8,
 
@@ -34,7 +38,7 @@ Program :: struct {
 	//	$0000 -> $3FFF : Bank 0 ROM
 	//	$4000 -> $7FFF : Bank X ROM
 	//	$8000 -> $9FFF : Bank X Save RAM
-	//	$A000 -> $CFFF : Bank X RAM
+	//	$A000 -> $BFFF : Bank X RAM
 	//	$C000 -> $EFFF : Bank X VRAM
 	//	$F000 -> $FEFF : Stack
 	//	$FF00 -> $FFFF : I/O

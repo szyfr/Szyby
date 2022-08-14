@@ -7,12 +7,8 @@ import "core:fmt"
 //= Main
 main :: proc() {
 	init_prg()
-
-//	run_cpu()
-//	run_cpu()
-//	run_cpu()
-//	run_cpu()
-//	fmt.printf(" - %X",program.regLP)
+	
+// /	program.debug = true
 
 	for program.running {
 		event_handler()
@@ -26,8 +22,10 @@ main :: proc() {
 
 update :: proc() {
 	if program.halt == false {
-		for i:=0;i<20;i+=int(run_cpu()) {}
-	//	run_cpu()
+		//! True speed for now
+	//	for i:=0;i<10000;i+=int(run_cpu()) {}
+		//! Debuging speed
+		for i:=0;i<100;i+=int(run_cpu()) {}
 	}
 
 }

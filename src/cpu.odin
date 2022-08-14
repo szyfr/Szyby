@@ -4,6 +4,13 @@ package main
 //= Imports
 import "core:fmt"
 
+
+//= Constants
+F_ZERO  :: 0b00000001
+F_CARRY :: 0b00000010
+F_INC_OVERFLOW :: 0b00000011
+
+
 //= Structures
 
 //= Procedures
@@ -25,180 +32,225 @@ run_cpu :: proc() -> u8 {
 	opcode : u8 = program.memory[program.regPC]
 	cycle  : u8 = 0
 
-	fmt.printf("%X:%X", program.regPC, opcode)
+	if program.debug do fmt.printf("%4X:%2X", program.regPC, opcode)
 
 	switch opcode {
 		//? NOP
 		case 0x00:
-			fmt.printf("\t\t- NOP")
+			if program.debug do fmt.printf("\t\t- NOP")
 			cycle = 10
-			break
-
 		//? HALT
 		case 0x01:
-			fmt.printf("\t\t- HALT")
+			if program.debug do fmt.printf("\t\t- HALT")
 			program.halt = true
 			cycle = 1
-			break
-
 		//? LD
-		case 0x10: // LD a,0
-			fmt.printf("\t\t- LDZ")
+		case 0x10: // LDZ
 			program.regA = 0x00
-			cycle = 2
-			break
-		case 0x11: // LD a,x
-			fmt.printf("\t\t- LD A,X")
-			var := program.regX
-			program.regA = var
-			cycle = 2
-			break
-		case 0x12: // LD a,y
-			fmt.printf("\t\t- LD A,Y")
-			var := program.regX
-			program.regA = var
-			cycle = 2
-			break
 
+			if program.debug do fmt.printf("\t\t- LDZ\t\t\t| LD A,$00")
+			cycle = 2
+		case 0x11: // LD a,x
+			program.regA = program.regX
+
+			if program.debug do fmt.printf("\t\t- LD A,X\t\t| LD A,$%2X", program.regX)
+			cycle = 2
+		case 0x12: // LD a,y
+			program.regA = program.regY
+
+			if program.debug do fmt.printf("\t\t- LD A,Y\t\t| LD A,$%2X", program.regY)
+			cycle = 2
 		case 0x20: // LD a,i8
 			inc_pc()
-			var := program.memory[program.regPC]
-			fmt.printf(" %X\t\t- LD A,$%X",var,var)
-			program.regA = var
-			cycle = 3
-			break
-		case 0x21: // LD x,i8
-			inc_pc()
-			var := program.memory[program.regPC]
-			fmt.printf(" %X\t\t- LD X,$%X",var,var)
-			program.regX = var
-			cycle = 3
-			break
-		case 0x22: // LD y,i8
-			inc_pc()
-			var := program.memory[program.regPC]
-			fmt.printf(" %X\t\t- LD Y,$%X",var,var)
-			program.regY = var
-			cycle = 3
-			break
-		case 0x23: // LD lp,i16
-			inc_pc()
-			var : u16 = u16(program.memory[program.regPC])
-			inc_pc()
-			var |= u16(program.memory[program.regPC]) << 8
-			fmt.printf(" %X\t- LD LP,$%X",var,var)
-			program.regLP = var
-			cycle = 4
-			break
+			program.regA = program.memory[program.regPC]
 
+			if program.debug do fmt.printf(" %2X\t- LD A,i8\t\t| LD A,$%2X", program.memory[program.regPC], program.memory[program.regPC])
+			cycle = 3
+		case 0x21: // LD x,a
+			program.regX = program.regA
+
+			if program.debug do fmt.printf("\t\t- LD X,A\t\t| LD X,$%2X", program.regA)
+			cycle = 2
+		case 0x22: // LD y,a
+			program.regY = program.regA
+
+			if program.debug do fmt.printf("\t\t- LD Y,A\t\t| LD Y,$%2X", program.regA)
+			cycle = 2
 		case 0x30: // LD a,m8
 			inc_pc()
-			var : u16 = u16(program.memory[program.regPC])
+			lower := program.memory[program.regPC]
 			inc_pc()
-			var += (u16(program.memory[program.regPC]) << 8)
-			fmt.printf(" %X\t- LD A,[$%X] (%X)",var,var,program.memory[var])
-			program.regA = program.memory[var]
+			upper := program.memory[program.regPC]
+			program.regA = program.memory[(u16(upper) << 8) | u16(lower)]
+			
+			if program.debug do fmt.printf(" %2X %2X\t- LD A,m8\t\t| LD A,[$%4X]", lower, upper, (u16(upper) << 8) | u16(lower))
 			cycle = 4
-			break
-		case 0x31: // LD x,m8
+		case 0x31: // LD m8,a
 			inc_pc()
-			var : u16 = u16(program.memory[program.regPC])
+			lower := program.memory[program.regPC]
 			inc_pc()
-			var += (u16(program.memory[program.regPC]) << 8)
-			fmt.printf(" %X\t- LD X,[$%X] (%X)",var,var,program.memory[var])
-			program.regX = program.memory[var]
+			upper := program.memory[program.regPC]
+			program.memory[(u16(upper) << 8) | u16(lower)] = program.regA
+			
+			if program.debug do fmt.printf(" %2X %2X\t- LD m8,A\t\t| LD [$%4X],$%2X", lower, upper, (u16(upper) << 8) | u16(lower), program.regA)
 			cycle = 4
-			break
-		case 0x32: // LD y,m8
+		case 0x32: // LD lp,i16
 			inc_pc()
-			var : u16 = u16(program.memory[program.regPC])
+			lower := program.memory[program.regPC]
 			inc_pc()
-			var += (u16(program.memory[program.regPC]) << 8)
-			fmt.printf(" %X\t- LD Y,[$%X] (%X)",var,var,program.memory[var])
-			program.regY = program.memory[var]
-			cycle = 4
-			break
+			upper := program.memory[program.regPC]
+			program.regLP = (u16(upper) << 8) | u16(lower)
 
-		case 0x40: // LD m8,a
-			inc_pc()
-			var : u16 = u16(program.memory[program.regPC])
-			inc_pc()
-			var += (u16(program.memory[program.regPC]) << 8)
-			fmt.printf(" %X\t- LD [$%X],A",var,var)
-			program.memory[var] = program.regA
+			if program.debug do fmt.printf(" %2X %2X\t- LD LP,i16\t\t| LD LP,$%4X", lower, upper, program.regLP)
 			cycle = 4
-			break
-		case 0x41: // LD m8,x
-			inc_pc()
-			var : u16 = u16(program.memory[program.regPC])
-			inc_pc()
-			var += (u16(program.memory[program.regPC]) << 8)
-			fmt.printf(" %X\t- LD [$%X],X",var,var)
-			program.memory[var] = program.regX
-			cycle = 4
-			break
-		case 0x42: // LD m8,y
-			inc_pc()
-			var : u16 = u16(program.memory[program.regPC])
-			inc_pc()
-			var += (u16(program.memory[program.regPC]) << 8)
-			fmt.printf(" %X\t- LD [$%X],Y",var,var)
-			program.memory[var] = program.regY
-			cycle = 4
-			break
+		case 0x40: // LD a,[LP]
+			program.regA = program.memory[program.regLP]
 
-		case 0x50: // LD a,[LP]
-			break
-		case 0x51: // LD x,[LP]
-			break
-		case 0x52: // LD y,[LP]
-			break
-
-		case 0x60: // LD [LP],a
-			fmt.printf("\t\t- LD [LP],A ([%X],%X)",program.regLP,program.regA)
+			if program.debug do fmt.printf(" \t- LD A,LP\t\t| LD A,[$%4X]", program.regLP)
+			cycle = 4
+		case 0x41: // LD [LP],a
 			program.memory[program.regLP] = program.regA
-			cycle = 2
-		case 0x61: // LD [LP],x
-			break
-		case 0x62: // LD [LP],y
-			break
-		
+
+			if program.debug do fmt.printf(" \t- LD LP,A\t\t| LD [$%4X],$%2X", program.regLP, program.regA)
+			cycle = 4
 		//? INC
-		case 0x13: // INC a
-			fmt.printf("\t\t- INC A")
-			program.regA += 1
-			cycle = 2
-		case 0x14: // INC x
-			fmt.printf("\t\t- INC X")
+		case 0x05: // INC x
+			if program.regX == 0xFF do program.regF = F_INC_OVERFLOW
 			program.regX += 1
-			cycle = 2
-		case 0x15: // INC y
-			fmt.printf("\t\t- INC Y")
+
+			if program.debug do fmt.printf(" \t- INC X\t\t\t| INC $%2X", program.regX-1)
+			cycle = 1
+		case 0x06: // INC y
+			if program.regY == 0xFF do program.regF = F_INC_OVERFLOW
 			program.regY += 1
-			cycle = 2
+
+			if program.debug do fmt.printf(" \t- INC Y\t\t\t| INC $%2X", program.regY-1)
+			cycle = 1
+		case 0x15: // INC a
+			if program.regA == 0xFF do program.regF = F_INC_OVERFLOW
+			program.regA += 1
+
+			if program.debug do fmt.printf(" \t- INC A\t\t\t| INC $%2X", program.regA-1)
+			cycle = 1
 		case 0x16: // INC lp
-			fmt.printf("\t\t- INC LP")
+			if program.regLP == 0xFFFF do program.regF = F_INC_OVERFLOW
 			program.regLP += 1
-			cycle = 2
+
+			if program.debug do fmt.printf(" \t- INC LP\t\t| INC $%4X", program.regLP-1)
+			cycle = 1
 		
 		//? JMP
-		case 0x24: // JMP i16 (forward)
-		case 0x25: // JMP i16 (backward)
-		case 0x26: // JMP  z,i16 (forward)
-		case 0x27: // JMP  z,i16 (backward)
-		case 0x28: // JMP nz,i16 (forward)
-		case 0x29: // JMP nz,i16 (backward)
-		case 0x2A: // JMP  c,i16 (forward)
-		case 0x2B: // JMP  c,i16 (backward)
-		case 0x2C: // JMP nc,i16 (forward)
-		case 0x2D: // JMP nc,i16 (backward)
+		case 0x60: // JMP +i8
 			inc_pc()
-			var := u8(program.memory[program.regPC])
-			fmt.printf("\t\t- JMP NC,-$%X",var)
+			var := program.memory[program.regPC]
+			program.regPC += u16(var)
+
+			if program.debug do fmt.printf(" %2X\t- JMP +$%X\t\t| JMP $%4X", var, var, program.regPC+1)
+			cycle = 4
+		case 0x70: // JMP -i8
+			inc_pc()
+			var := program.memory[program.regPC]
 			program.regPC -= u16(var)
+
+			if program.debug do fmt.printf(" %2X\t- JMP -$%X\t\t| JMP $%4X", var, var, program.regPC+1)
+			cycle = 4
+		case 0x61: // JMP  z,+i8
+			inc_pc()
+			var := program.memory[program.regPC]
+			if ((program.regF & F_ZERO) == F_ZERO) do program.regPC += u16(var)
+
+			if program.debug do fmt.printf(" %2X\t- JMP Z,+$%X\t\t| JMP Z,$%4X", var, var, program.regPC+1)
+			cycle = 4
+		case 0x71: // JMP  z,-i8
+			inc_pc()
+			var := program.memory[program.regPC]
+			if ((program.regF & F_ZERO) == F_ZERO) do program.regPC -= u16(var)
+
+			if program.debug do fmt.printf(" %2X\t- JMP Z,-$%X\t\t| JMP Z,$%4X", var, var, program.regPC+1)
+			cycle = 4
+		case 0x62: // JMP nz,+i8
+			inc_pc()
+			var := program.memory[program.regPC]
+			if !((program.regF & F_ZERO) == F_ZERO) do program.regPC += u16(var)
+
+			if program.debug do fmt.printf(" %2X\t- JMP NZ,+$%X\t\t| JMP NZ,$%4X", var, var, program.regPC+1)
+			cycle = 4
+		case 0x72: // JMP nz,-i8
+			inc_pc()
+			var := program.memory[program.regPC]
+			if !((program.regF & F_ZERO) == F_ZERO) do program.regPC -= u16(var)
+
+			if program.debug do fmt.printf(" %2X\t- JMP NZ,-$%X\t\t| JMP NZ,$%4X", var, var, program.regPC+1)
+			cycle = 4
+		case 0x63: // JMP  c,+i8
+			inc_pc()
+			var := program.memory[program.regPC]
+			if ((program.regF & F_CARRY) == F_CARRY) do program.regPC += u16(var)
+
+			if program.debug do fmt.printf(" %2X\t- JMP C,+$%X\t\t| JMP C,$%4X", var, var, program.regPC+1)
+			cycle = 4
+		case 0x73: // JMP  c,-i8
+			inc_pc()
+			var := program.memory[program.regPC]
+			if ((program.regF & F_CARRY) == F_CARRY) do program.regPC -= u16(var)
+
+			if program.debug do fmt.printf(" %2X\t- JMP C,-$%X\t\t| JMP C,$%4X", var, var, program.regPC+1)
+			cycle = 4
+		case 0x64: // JMP nc,+i8
+			inc_pc()
+			var := program.memory[program.regPC]
+			if !((program.regF & F_CARRY) == F_CARRY) do program.regPC += u16(var)
+
+			if program.debug do fmt.printf(" %2X\t- JMP NC,+$%X\t\t| JMP NC,$%4X", var, var, program.regPC+1)
+			cycle = 4
+		case 0x74: // JMP nc,-i8
+			inc_pc()
+			var := program.memory[program.regPC]
+			if !((program.regF & F_CARRY) == F_CARRY) do program.regPC -= u16(var)
+
+			if program.debug do fmt.printf(" %2X\t- JMP NC,-$%X\t\t| JMP NC,$%4X", var, var, program.regPC+1)
+			cycle = 4
+		//? CMP
+		case 0x03: // CMP a,i8
+			inc_pc()
+			val := program.memory[program.regPC]
+			if (program.regA - val) == 0 do program.regF = F_ZERO
+
+			if program.debug do fmt.printf(" %2X\t- CMP A,i8\t\t| CMP $%2X,$%2X", val, program.regA, val)
+			cycle = 2
+		case 0x04: // CMP a,m8
+			inc_pc()
+			lower := program.memory[program.regPC]
+			inc_pc()
+			upper := program.memory[program.regPC]
+			complete := (u16(upper) << 8) | u16(lower)
+			if (program.regA - program.memory[complete]) == 0 do program.regF = F_ZERO
+
+			if program.debug do fmt.printf(" %2X %2X\t- CMP A,m8\t\t| CMP $%2X,[$%4X]", lower, upper, program.regA, complete)
+			cycle = 4
+		case 0x13: // CMP a,x
+			if (program.regA - program.regX) == 0 do program.regF = F_ZERO
+
+			if program.debug do fmt.printf(" \t- CMP A,X\t\t| CMP $%2X,$%2X", program.regA, program.regX)
+			cycle = 4
+		case 0x14: // CMP a,y
+			if (program.regA - program.regY) == 0 do program.regF = F_ZERO
+
+			if program.debug do fmt.printf(" \t- CMP A,Y\t\t| CMP $%2X,$%2X", program.regA, program.regY)
+			cycle = 4
+		case 0x23: // CMP lp,i16
+			inc_pc()
+			lower := program.memory[program.regPC]
+			inc_pc()
+			upper := program.memory[program.regPC]
+			complete := (u16(upper) << 8) | u16(lower)
+			if (program.regLP - complete) == 0 do program.regF = F_ZERO
+
+			if program.debug do fmt.printf(" %2X %2X\t- CMP LP,i8\t\t| CMP $%4X,$%4X", lower, upper, program.regLP, complete)
+			cycle = 6
 	}
 
-	fmt.printf("\n")
+	if program.debug do fmt.printf("\n")
 	inc_pc()
 
 	return cycle

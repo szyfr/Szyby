@@ -136,15 +136,25 @@ run_cpu :: proc() -> u8 {
 
 			if program.debug do fmt.printf(" %2X %2X\t- LD LP,i16\t\t| LD LP,$%4X", lower, upper, program.regLP)
 			cycle = 4
-		case 0x40: // LD a,[LP]
+		case 0x40: // LD a,[lp]
 			program.regA = program.memory[program.regLP]
 
-			if program.debug do fmt.printf(" \t- LD A,LP\t\t| LD A,[$%4X]", program.regLP)
+			if program.debug do fmt.printf(" \t- LD A,[LP]\t\t| LD A,[$%4X]", program.regLP)
 			cycle = 4
-		case 0x41: // LD [LP],a
+		case 0x41: // LD [lp],a
 			program.memory[program.regLP] = program.regA
 
-			if program.debug do fmt.printf(" \t- LD LP,A\t\t| LD [$%4X],$%2X", program.regLP, program.regA)
+			if program.debug do fmt.printf(" \t- LD [LP],A\t\t| LD [$%4X],$%2X", program.regLP, program.regA)
+			cycle = 4
+		case 0x02: // LD lp,sp
+			program.regLP = program.regSP
+			
+			if program.debug do fmt.printf(" \t- LD LP,SP\t\t| LD $%4X,$%4X", program.regLP, program.regSP)
+			cycle = 4
+		case 0x42: // LD lp,xy
+			program.regLP = (u16(program.regX) << 8) | u16(program.regY)
+			
+			if program.debug do fmt.printf(" \t- LD LP,XY\t\t| LD LP,$%2X%2X", program.regX, program.regY)
 			cycle = 4
 		//? INC
 		case 0x05: // INC x

@@ -1,7 +1,7 @@
 
 
 ;;= BOOT v1.1
-;; length: 28 bytes
+;; length: 30 bytes
 start: ;; $0000
 	ld a,1         ;? | 20 01    | Sets graphics into Bitmap mode
 	ld [$C001],a   ;? | 31 01 C0 |
@@ -11,10 +11,11 @@ start: ;; $0000
 	ld y,a         ;? | 22       |   |
 	ld lp,$A000    ;? | 32 00 A0 |   |
 	call memset    ;? | 51 FF 00 | - |
-	ld a,$20       ;? | 20 20    | - |
+	ld a,$1F       ;? | 20 1F    | - |
 	ld x,a         ;? | 21       |   |
-	ldz            ;? | 10       |   | Clear VRAM
+	ld a,$EF       ;? | 20 EF    |   | Clear VRAM
 	ld y,a         ;? | 22       |   |
+	ldz            ;? | 10       |   |
 	ld lp,$C010    ;? | 32 10 C0 |   |
 	call memset    ;? | 51 FF 00 | - |
 	halt           ;? | 01       |

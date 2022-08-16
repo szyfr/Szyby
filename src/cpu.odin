@@ -57,23 +57,23 @@ run_cpu :: proc() -> u8 {
 			lower := program.memory[program.regSP]
 			compl := (u16(upper) << 8) | u16(lower)
 
-			program.regPC = compl
+			program.regPC = compl - 1
 			if program.debug do fmt.printf(" \t- RET\t\t\t| RET $%4X", compl)
 			cycle = 4
 		case 0x51: // CALL i16
-			lower := u8(program.regPC+3)
-			upper := u8(program.regPC+3 >> 8)
-
-			program.memory[program.regSP] = lower
-			program.regSP -= 1
-			program.memory[program.regSP] = upper
-			program.regSP -= 1
-
 			inc_pc()
-			lower = program.memory[program.regPC]
+			lower := program.memory[program.regPC]
 			inc_pc()
-			upper = program.memory[program.regPC]
+			upper := program.memory[program.regPC]
+			inc_pc()
+
+			program.memory[program.regSP] = u8(program.regPC)
+			program.regSP -= 1
+			program.memory[program.regSP] = u8(program.regPC >> 8)
+			program.regSP -= 1
+
 			program.regPC = (u16(upper) << 8) | u16(lower)
+
 			
 			if program.debug do fmt.printf(" %2X %2X\t- CALL i16\t\t| CALL $%4X", lower, upper, program.regPC+1)
 			cycle = 4

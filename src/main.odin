@@ -25,7 +25,7 @@ update :: proc() {
 		//! True speed for now
 	//	for i:=0;i<10000;i+=int(run_cpu()) {}
 		//! Debuging speed
-		for i:=0;i<100;i+=int(run_cpu()) {}
+		for i:=0;i<100;i+=int(run_cpu()) { if program.halt do break }
 	}
 
 }

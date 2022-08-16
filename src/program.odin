@@ -77,7 +77,7 @@ init_prg :: proc() {
 	init_cpu()
 
 	//* Boot ROM
-	bootROM, succ := os.read_entire_file_from_filename("data/testing.bin")
+	bootROM, succ := os.read_entire_file_from_filename("data/boot.bin")
 	if !succ do fmt.printf("[ERROR]: Failed to load boot ROM.")
 
 	for i:=0; i<0x2000; i+=1 do program.memory[i] = bootROM[i]

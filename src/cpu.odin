@@ -186,7 +186,21 @@ run_cpu :: proc() -> u8 {
 			if program.debug do fmt.printf(" \t- INC LP\t\t| INC $%4X", program.regLP-1)
 			cycle = 1
 		//? DEC
-		case 0x27:
+		case 0x25: // DEC x
+			if program.regX == 0x01 do program.regF = F_DEC_ZERO_T
+			else do program.regF = F_DEC_ZERO_F
+			program.regX -= 1
+
+			if program.debug do fmt.printf(" \t- DEC X\t\t\t| DEC $%2X", program.regX+1)
+			cycle = 2
+		case 0x26: // DEC y
+			if program.regY == 0x01 do program.regF = F_DEC_ZERO_T
+			else do program.regF = F_DEC_ZERO_F
+			program.regY -= 1
+
+			if program.debug do fmt.printf(" \t- DEC Y\t\t\t| DEC $%2X", program.regY+1)
+			cycle = 2
+		case 0x27: // DEC xy
 			comb := (u16(program.regX) << 8) | u16(program.regY)
 
 			if program.regX == 0x00 && program.regY == 0x01 do program.regF = F_DEC_ZERO_T
@@ -195,6 +209,20 @@ run_cpu :: proc() -> u8 {
 			program.regY -= 1
 
 			if program.debug do fmt.printf(" \t- DEC XY\t\t| DEC $%4X", comb)
+			cycle = 3
+		case 0x35: // DEC a
+			if program.regA == 0x01 do program.regF = F_DEC_ZERO_T
+			else do program.regF = F_DEC_ZERO_F
+			program.regA -= 1
+
+			if program.debug do fmt.printf(" \t- DEC A\t\t\t| DEC $%2X", program.regA+1+1)
+			cycle = 2
+		case 0x36: // DEC lp
+			if program.regLP == 0x0001 do program.regF = F_DEC_ZERO_T
+			else do program.regF = F_DEC_ZERO_F
+			program.regLP -= 1
+
+			if program.debug do fmt.printf(" \t- DEC LP\t\t| DEC $%4X", program.regLP+1)
 			cycle = 2
 		//? JMP
 		case 0x60: // JMP +i8
@@ -309,6 +337,16 @@ run_cpu :: proc() -> u8 {
 			else do program.regF = F_ZERO_F
 
 			if program.debug do fmt.printf(" %2X %2X\t- CMP LP,i8\t\t| CMP $%4X,$%4X", lower, upper, program.regLP, complete)
+			cycle = 6
+		case 0x24: // CMP xy,i16
+			inc_pc()
+			lower := program.memory[program.regPC]
+			inc_pc()
+			upper := program.memory[program.regPC]
+			if (program.regX - upper) == 0 && (program.regY - lower) == 0 do program.regF = F_ZERO_T
+			else do program.regF = F_ZERO_F
+
+			if program.debug do fmt.printf(" %2X %2X\t- CMP XY,i8\t\t| CMP $%2X%2X,$%2X%2X", lower, upper, program.regX, program.regY, upper, lower)
 			cycle = 6
 		//? PUSH
 		case 0x08: // PUSH af

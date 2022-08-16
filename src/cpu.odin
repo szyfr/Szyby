@@ -310,6 +310,64 @@ run_cpu :: proc() -> u8 {
 
 			if program.debug do fmt.printf(" %2X %2X\t- CMP LP,i8\t\t| CMP $%4X,$%4X", lower, upper, program.regLP, complete)
 			cycle = 6
+		//? PUSH
+		case 0x08: // PUSH af
+			program.memory[program.regSP] = program.regF
+			program.regSP -= 1
+			program.memory[program.regSP] = program.regA
+			program.regSP -= 1
+
+			if program.debug do fmt.printf(" \t- PUSH AF\t\t| PUSH $%2X%2X", program.regA, program.regF)
+			cycle = 2
+		case 0x18: // PUSH xy
+			program.memory[program.regSP] = program.regY
+			program.regSP -= 1
+			program.memory[program.regSP] = program.regX
+			program.regSP -= 1
+
+			if program.debug do fmt.printf(" \t- PUSH XY\t\t| PUSH $%2X%2X", program.regX, program.regY)
+			cycle = 2
+		case 0x28: // PUSH lp
+			program.memory[program.regSP] = u8(program.regLP)
+			program.regSP -= 1
+			program.memory[program.regSP] = u8(program.regLP >> 8)
+			program.regSP -= 1
+
+			if program.debug do fmt.printf(" \t- PUSH LP\t\t| PUSH $%4X", program.regLP)
+			cycle = 2
+		//? POP
+		case 0x09: // POP af
+			program.regSP += 1
+			upper := program.memory[program.regSP]
+			program.regSP += 1
+			lower := program.memory[program.regSP]
+
+			program.regA = upper
+			program.regF = lower
+
+			if program.debug do fmt.printf(" \t- POP AF\t\t| POP  $%2X%2X", program.regA, program.regF)
+			cycle = 2
+		case 0x19: // POP xy
+			program.regSP += 1
+			upper := program.memory[program.regSP]
+			program.regSP += 1
+			lower := program.memory[program.regSP]
+
+			program.regX = upper
+			program.regY = lower
+
+			if program.debug do fmt.printf(" \t- POP XY\t\t| POP  $%2X%2X", program.regX, program.regY)
+			cycle = 2
+		case 0x29: // POP lp
+			program.regSP += 1
+			upper := program.memory[program.regSP]
+			program.regSP += 1
+			lower := program.memory[program.regSP]
+
+			program.regLP = (u16(upper) << 8) | u16(lower)
+
+			if program.debug do fmt.printf(" \t- POP LP\t\t| POP  $%4X", program.regLP)
+			cycle = 2
 	}
 
 	if program.debug do fmt.printf("\n")

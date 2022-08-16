@@ -8,7 +8,7 @@ import "core:fmt"
 main :: proc() {
 	init_prg()
 	
-// /	program.debug = true
+	program.debug = true
 
 	for program.running {
 		event_handler()

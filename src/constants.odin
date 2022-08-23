@@ -1,0 +1,19 @@
+package main
+
+
+//= Constants
+SCREEN_MAGNIFICATION :: 8
+
+COL_0 :: Color{0xE0,0xF8,0xD0,0xFF}
+COL_1 :: Color{0x88,0xC0,0x70,0xFF}
+COL_2 :: Color{0x34,0x68,0x56,0xFF}
+COL_3 :: Color{0x08,0x18,0x20,0xFF}
+
+F_ZERO_T         :: 0b00000001
+F_ZERO_F         :: 0b00000000
+F_CARRY_T        :: 0b00000010
+F_CARRY_F        :: 0b00000000
+F_INC_OVERFLOW_T :: 0b00000011
+F_INC_OVERFLOW_F :: 0b00000000
+F_DEC_ZERO_T     :: 0b00000001
+F_DEC_ZERO_F     :: 0b00000000

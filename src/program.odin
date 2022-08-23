@@ -9,45 +9,7 @@ import "core:time"
 import "vendor:sdl2"
 
 
-//= Structures
-Program :: struct {
-	window  : ^sdl2.Window,
-	surface : ^sdl2.Surface,
-	screen  :  sdl2.Rect,
-
-	running :  bool,
-	debug   :  bool,
-
-	//* CPU
-	halt  : bool,
-
-	//- Registers
-	regA  :  u8,
-	regF  :  u8,
-	//? 0 - Z
-	//? 1 - C
-	regX  :  u8,
-	regY  :  u8,
-
-	regLP : u16,
-
-	regPC : u16,
-	regSP : u16,
-
-	memory  :  [0x10000]u8,
-	//	$0000 -> $3FFF : Bank 0 ROM
-	//	$4000 -> $7FFF : Bank X ROM
-	//	$8000 -> $9FFF : Bank X Save RAM
-	//	$A000 -> $BFFF : Bank X RAM
-	//	$C000 -> $EFFF : Bank X VRAM
-	//	$F000 -> $FEFF : Stack
-	//	$FF00 -> $FFFF : I/O
-}
-program : ^Program
-
-
 //= Procedures
-
 //* Initialization
 init_prg :: proc() {
 	program = new(Program)
@@ -60,7 +22,8 @@ init_prg :: proc() {
 		"TEST",
 		sdl2.WINDOWPOS_UNDEFINED,
 		sdl2.WINDOWPOS_UNDEFINED,
-		1280, 720,
+//		1280, 720,
+		896, 704,
 		sdl2.WINDOW_SHOWN,
 	)
 	if program.window == nil do fmt.printf("[ERROR]: Failed to create window.")
@@ -72,6 +35,8 @@ init_prg :: proc() {
 	//* Set program variables
 	program.screen  = sdl2.Rect{0, 0, 896, 704}
 	program.running = true
+	program.debug   = DEBUG
+	program.screenMagnification = SCREEN_MAGNIFICATION
 
 	//* CPU
 	init_cpu()
@@ -88,7 +53,6 @@ init_prg :: proc() {
 		if  i != 0xA000 || i != 0xC000 do program.memory[i] = u8(rand.uint32())
 	}
 }
-
 //* Closure
 close_prg :: proc() {
 	sdl2.FreeSurface(program.surface)

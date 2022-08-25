@@ -22,13 +22,13 @@ init_prg :: proc() {
 		"TEST",
 		sdl2.WINDOWPOS_UNDEFINED,
 		sdl2.WINDOWPOS_UNDEFINED,
-		896, 704,
+		SCREEN_WIDTH_MAX, SCREEN_HEIGHT_MAX,
 		sdl2.WINDOW_SHOWN,
 	)
 	if program.window == nil do fmt.printf("[ERROR]: Failed to create window.")
 
 	//* Get surface
-	program.surface = sdl2.CreateRGBSurface(0, 112, 88, 32, 0, 0, 0, 0)
+	program.surface = sdl2.CreateRGBSurface(0, SCREEN_WIDTH_MIN, SCREEN_HEIGHT_MIN, 32, 0, 0, 0, 0)
 	if program.surface == nil do fmt.printf("[ERROR]: Failed to create Surface.")
 
 	//* Get Renderer
@@ -37,7 +37,7 @@ init_prg :: proc() {
 //	sdl2.RenderSetScale(program.renderer, 2, 2)
 
 	//* Set program variables
-	program.screen  = sdl2.Rect{0, 0, 896, 704}
+	program.screen  = sdl2.Rect{0, 0, SCREEN_WIDTH_MAX, SCREEN_HEIGHT_MAX}
 	program.running = true
 
 	//* CPU
@@ -51,7 +51,7 @@ init_prg :: proc() {
 	delete(bootROM)
 
 	//* Randomize RAM
-	for i:=0xA000;i<0xFEFF;i+=1 {
+	for i:=RAM_START;i<0xFEFF;i+=1 {
 		if  i != 0xA000 || i != 0xC000 do program.memory[i] = u8(rand.uint32())
 	}
 }

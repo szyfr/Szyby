@@ -17,6 +17,9 @@ Program :: struct {
 	texture  : ^sdl2.Texture,
 	screen   :  sdl2.Rect,
 
+	srfTiles : ^sdl2.Surface, 
+	recTiles :  sdl2.Rect,
+
 	running :  bool,
 
 	//* CPU

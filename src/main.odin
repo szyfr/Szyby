@@ -31,11 +31,9 @@ main :: proc() {
 }
 
 update :: proc() {
-	if program.halt == false {
-		//! True speed for now
-		for i:=0;i<10000;i+=int(run_cpu()) { if program.halt do break }
-		//! Debuging speed
-	//	for i:=0;i<100;i+=int(run_cpu()) { if program.halt do break }
+	if !program.halt {
+		if !DEBUG do for i:=0;i<100000;i+=int(run_cpu()) { if program.halt do break }
+		else      do for i:=0;i<100;i+=int(run_cpu()) { if program.halt do break }
 	}
 
 }

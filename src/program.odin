@@ -22,15 +22,19 @@ init_prg :: proc() {
 		"TEST",
 		sdl2.WINDOWPOS_UNDEFINED,
 		sdl2.WINDOWPOS_UNDEFINED,
-//		1280, 720,
 		896, 704,
 		sdl2.WINDOW_SHOWN,
 	)
 	if program.window == nil do fmt.printf("[ERROR]: Failed to create window.")
 
 	//* Get surface
-	program.surface = sdl2.GetWindowSurface(program.window)
-	if program.surface == nil do fmt.printf("[ERROR]: Failed to get Surface.")
+	program.surface = sdl2.CreateRGBSurface(0, 112, 88, 32, 0, 0, 0, 0)
+	if program.surface == nil do fmt.printf("[ERROR]: Failed to create Surface.")
+
+	//* Get Renderer
+	program.renderer = sdl2.CreateRenderer(program.window, -1, sdl2.RENDERER_ACCELERATED)
+	if program.renderer == nil do fmt.printf("[ERROR]: Failed to get Renderer.")
+//	sdl2.RenderSetScale(program.renderer, 2, 2)
 
 	//* Set program variables
 	program.screen  = sdl2.Rect{0, 0, 896, 704}

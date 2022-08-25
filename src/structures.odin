@@ -11,9 +11,11 @@ Color :: struct {
 }
 
 Program :: struct {
-	window  : ^sdl2.Window,
-	surface : ^sdl2.Surface,
-	screen  :  sdl2.Rect,
+	window   : ^sdl2.Window,
+	renderer : ^sdl2.Renderer,
+	surface  : ^sdl2.Surface,
+	texture  : ^sdl2.Texture,
+	screen   :  sdl2.Rect,
 
 	screenMagnification : int,
 

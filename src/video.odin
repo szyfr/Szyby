@@ -16,10 +16,9 @@ draw :: proc() {
 		case 0x01: // Monochrome Bitmap mode
 			pixel := 0
 			for i:=0xC010;i<0xC010+0x9A0;i+=1 {
-				off : u32 = 0
-				for o:=0;o<4;o+=1 {
+				for o:u32=0;o<8;o+=2 {
 					col : Color
-					val := ((program.memory[i] >> off) & 0x03)
+					val := ((program.memory[i] >> o) & 0x03)
 
 					switch val {
 						case 0x00: col = COL_0
@@ -28,31 +27,21 @@ draw :: proc() {
 						case 0x03: col = COL_3
 					}
 
-					draw_pixel_major(pixel%112, pixel/112, col)
+					draw_pixel(pixel%112, pixel/112, col)
 					pixel +=1
-					off   +=2
 				}
 			}
 		case 0x02: // Monochrome Tile mode
 		// ...
 	}
 
-	sdl2.UpdateWindowSurface(program.window)
+	sdl2.DestroyTexture(program.texture)
+	program.texture = sdl2.CreateTextureFromSurface(program.renderer, program.surface)
+	sdl2.RenderCopy(program.renderer, program.texture, nil, &program.screen)
+	sdl2.RenderPresent(program.renderer)
 }
 
-
-//* Draw pixel
-draw_pixel_major :: proc(x,y : int, c : Color) {
-	mag := program.screenMagnification
-
-	for o:=0; o<mag; o+=1 {
-		for i:=0; i<mag; i+=1 {
-			draw_pixel_minor((x * mag) + i, (y * mag) + o, c)
-		}
-	}
-}
-// TODO: Roughly takes 2-3 milliseconds per color to fill screen
-draw_pixel_minor :: proc(x,y : int, c : Color) {
+draw_pixel :: proc(x,y : int, c : Color) {
 	width, height : int = int(program.surface.w), int(program.surface.h)
 
 	arr := mem.ptr_to_bytes(

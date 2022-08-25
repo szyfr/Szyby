@@ -17,10 +17,7 @@ Program :: struct {
 	texture  : ^sdl2.Texture,
 	screen   :  sdl2.Rect,
 
-	screenMagnification : int,
-
 	running :  bool,
-	debug   :  bool,
 
 	//* CPU
 	halt  : bool,

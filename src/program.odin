@@ -39,8 +39,6 @@ init_prg :: proc() {
 	//* Set program variables
 	program.screen  = sdl2.Rect{0, 0, 896, 704}
 	program.running = true
-	program.debug   = DEBUG
-	program.screenMagnification = SCREEN_MAGNIFICATION
 
 	//* CPU
 	init_cpu()
@@ -61,5 +59,7 @@ init_prg :: proc() {
 close_prg :: proc() {
 	sdl2.FreeSurface(program.surface)
 	sdl2.DestroyWindow(program.window)
+	sdl2.DestroyTexture(program.texture)
+	sdl2.DestroyRenderer(program.renderer)
 	sdl2.Quit()
 }

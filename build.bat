@@ -9,7 +9,6 @@ set "date=%dt:~0,4%_%dt:~4,2%_%dt:~6,2%"
 
 xcopy "data\"    "target\debug\%date%\data\" /v /q /s /e /y > nul
 xcopy "src\"     "target\debug\%date%\src\"  /v /q /s /e /y > nul
-xcopy "include\" "target\debug\%date%\"      /v /q /s /e /y > nul
 
 rem Get start time:
 for /F "tokens=1-4 delims=:.," %%a in ("%time%") do (

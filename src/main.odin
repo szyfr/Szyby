@@ -20,13 +20,13 @@ main :: proc() {
 		// TODO: Keybindings to step through instructions
 		event_handler()
 
-		t0 := time.now()
+	//	t0 := time.now()
 
 		update()
 		draw()
 
-		t1 := time.duration_milliseconds(time.since(t0))
-		fmt.printf("%v fps\n", 1 / (t1 / 1000))
+	//	t1 := time.duration_milliseconds(time.since(t0))
+	//	fmt.printf("%v fps\n", 1 / (t1 / 1000))
 	}
 }
 

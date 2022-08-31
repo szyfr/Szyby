@@ -28,7 +28,7 @@ run_cpu :: proc() -> u8 {
 		//? NOP
 		case 0x00:
 			if DEBUG do fmt.printf("\t\t- NOP\n")
-			cycle = 10
+			cycle = 1
 			inc_pc()
 		//? HALT
 		case 0x01:
@@ -51,7 +51,7 @@ run_cpu :: proc() -> u8 {
 
 			program.regPC = addr
 
-			if DEBUG do fmt.printf(" %2X %2X\t- CALL i16\t\t| CALL $%4X\n", lower, upper, program.regPC+1)
+			if DEBUG do fmt.printf(" %2X %2X\t- CALL i16\t\t| CALL $%4X\n", lower, upper, program.regPC)
 			cycle = 4
 			inc_pc()
 		//? LD
